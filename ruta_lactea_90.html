@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruta Láctea 90 – Juego de inducción y período de prueba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F6EEDC; --paper:#FFFBF2; --ink:#2E2618; --muted:#6B5E48; --line:#D8C9A8;
+  --z1:#3F86D6; --z2:#4FA35A; --z3:#E2B92E; --z4:#E5822F; --z5:#D64B47; --zd:#8B57B5; --gold:#F5C518;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:Nunito,system-ui,sans-serif}
+h1,h2,h3,.fred{font-family:Fredoka,Nunito,sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:800;font-size:15px;padding:10px 16px;transition:transform .08s, box-shadow .15s, background .15s}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn{background:var(--ink);color:#fff}
+.btn:hover:not(:disabled){background:#4a3d27}
+.btn-soft{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.btn-soft:hover{border-color:var(--ink)}
+.btn-ok{background:var(--z2);color:#fff}.btn-mid{background:var(--z3);color:var(--ink)}.btn-no{background:var(--z5);color:#fff}
+.wrap{max-width:1280px;margin:0 auto;padding:18px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid var(--ink);display:grid;place-items:center}
+.brand h1{margin:0;font-size:28px;letter-spacing:.5px}
+.brand p{margin:0;color:var(--muted);font-size:14px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* SETUP */
+.setup{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.panel{background:var(--paper);border:2px solid var(--line);border-radius:var(--radius);padding:18px}
+.panel h2{margin:0 0 10px;font-size:22px}
+.company{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:14px}
+.company b{color:var(--muted)}
+.prow{display:flex;gap:8px;align-items:center;margin:8px 0}
+.prow input{flex:1;padding:10px 12px;border:2px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+.chip{width:26px;height:26px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--ink);flex:none}
+.zones-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.zl{display:flex;align-items:center;gap:6px;font-size:13px;background:#fff;border:1px solid var(--line);padding:4px 10px;border-radius:999px}
+.zl i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* GAME */
+.game{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:start}
+.boardbox{background:#EADBB8;border:4px solid #8B6B3E;border-radius:18px;padding:14px;box-shadow:inset 0 0 0 4px #F3E7CB}
+.board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(4,1fr);gap:8px;aspect-ratio:9/4.4}
+.sq{position:relative;border-radius:10px;border:2px solid rgba(0,0,0,.55);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:4px;font-family:Fredoka,Nunito,sans-serif;min-width:0}
+.sq .n{font-size:clamp(13px,1.7vw,22px);font-weight:700;line-height:1}
+.sq .lab{font-size:clamp(8px,.85vw,11px);font-weight:600;text-align:center;line-height:1.05;margin-top:2px;opacity:.95}
+.sq.gate{border:4px solid #1d1d1d;box-shadow:0 0 0 2px #fff inset}
+.sq.start{background:#fff;color:var(--ink)}
+.sq.meta{background:var(--gold);color:var(--ink);border:4px solid #1d1d1d}
+.sq.here{outline:4px solid #fff;outline-offset:2px;box-shadow:0 0 0 7px var(--ink)}
+.tokens{position:absolute;bottom:4px;left:3px;right:3px;display:flex;flex-wrap:wrap;gap:2px;justify-content:center}
+.tok{width:clamp(10px,1.4vw,18px);height:clamp(10px,1.4vw,18px);border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5);transition:all .25s}
+.tok.active{transform:scale(1.25);box-shadow:0 0 0 2px var(--ink),0 2px 6px rgba(0,0,0,.5)}
+.boardfoot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap}
+.turnbox{display:flex;align-items:center;gap:12px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:10px 14px;flex:1;min-width:260px}
+.die{width:58px;height:58px;border-radius:12px;background:#fff;border:3px solid var(--ink);display:grid;place-items:center;font:700 30px Fredoka,Nunito,sans-serif;flex:none}
+.die.roll{animation:shake .5s}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg)}50%{transform:rotate(12deg)}75%{transform:rotate(-6deg)}}
+.turninfo{flex:1;font-size:14px}
+.turninfo .who{font:700 18px Fredoka,Nunito,sans-serif;display:flex;align-items:center;gap:8px}
+.clock{font:600 15px Fredoka,Nunito,sans-serif;background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px 12px}
+.side{display:flex;flex-direction:column;gap:12px}
+.pcard{background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:10px 12px}
+.pcard.current{border-color:var(--ink);box-shadow:0 3px 0 var(--ink)}
+.pcard .h{display:flex;align-items:center;gap:8px;font:700 16px Fredoka,Nunito,sans-serif}
+.pcard .h .lit{margin-left:auto;background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:14px}
+.seals{display:flex;gap:4px;margin:6px 0 4px}
+.seal{flex:1;text-align:center;font:700 11px Fredoka,Nunito,sans-serif;border-radius:6px;padding:3px 0;background:#eee;color:#999;border:1px dashed #bbb}
+.seal.on{color:#fff;border-style:solid;border-color:rgba(0,0,0,.3)}
+.ac{font-size:12px;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--z3);color:var(--ink);margin-left:4px}
+.log{background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:10px 12px;max-height:210px;overflow:auto;font-size:13px}
+.log div{padding:3px 0;border-bottom:1px dashed var(--line)}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(30,22,10,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.ov.show{display:flex}
+.modal{background:var(--paper);border-radius:18px;max-width:640px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.35);border:3px solid var(--ink)}
+.mhead{padding:14px 18px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mhead h3{margin:0;font-size:20px}
+.mhead .pts{background:rgba(255,255,255,.25);border-radius:999px;padding:4px 12px;font-weight:800;white-space:nowrap}
+.mbody{padding:18px}
+.q{font-size:18px;font-weight:700;line-height:1.35;margin:0 0 14px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;background:#fff;border:2px solid var(--line);color:var(--ink);font-weight:700;padding:12px 14px;border-radius:12px;font-size:15px}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt:disabled{opacity:.6}
+.opt.good,.opt.bad{opacity:1!important}
+.opt.good{background:#E3F4E4;border-color:var(--z2)}
+.opt.bad{background:#FBE3E2;border-color:var(--z5)}
+.timer{height:8px;background:#eadfc6;border-radius:99px;overflow:hidden;margin-bottom:14px}
+.timer i{display:block;height:100%;background:var(--ink);width:100%;transition:width 1s linear}
+.fb{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+.fb.show{display:block}
+.fb.ok{background:#E3F4E4;border:2px solid var(--z2)}
+.fb.no{background:#FBE3E2;border:2px solid var(--z5)}
+.fb.info{background:#FFF4D6;border:2px solid var(--z3)}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:0 18px 18px}
+.rules h4{margin:14px 0 4px;font-family:Fredoka}
+.rules p,.rules li{font-size:14.5px;line-height:1.45}
+.rules ul{padding-left:20px;margin:4px 0}
+table.res{width:100%;border-collapse:collapse;font-size:14px}
+table.res th,table.res td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+table.res th{font-family:Fredoka,Nunito,sans-serif;background:#F1E6CC}
+.verdict{font-weight:800;border-radius:999px;padding:3px 10px;font-size:12px;white-space:nowrap}
+.v1{background:var(--gold)}.v2{background:#CFEBD1}.v3{background:#F6D0CE}
+.mentorpick{display:flex;flex-wrap:wrap;gap:8px}
+.hidden{display:none!important}
+@media (max-width:900px){.setup,.game{grid-template-columns:1fr}.board{gap:4px}.brand h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="26" height="30" viewBox="0 0 26 30"><path d="M8 1h10v5l4 6v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V12l4-6z" fill="#fff" stroke="#2E2618" stroke-width="2.2" stroke-linejoin="round"/><path d="M4 17h18v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="#3F86D6"/></svg>
+      </div>
+      <div>
+        <h1>RUTA LÁCTEA 90</h1>
+        <p>Del primer día a la confirmación · CoopeMontaña Verde R.L.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn-soft" onclick="openRules()">📖 Reglas</button>
+      <button class="btn-soft hidden" id="btnEnd" onclick="confirmEnd()">🏁 Terminar partida</button>
+      <button class="btn-soft hidden" id="btnRestart" onclick="location.reload()">↺ Nueva partida</button>
+    </div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup" class="setup">
+    <div class="panel">
+      <h2>Bienvenida a CoopeMontaña Verde R.L.</h2>
+      <p style="margin-top:0">Cada jugador es una persona recién contratada en una cooperativa lechera mediana de Zarcero, Alajuela. El tablero recorre los <b>90 días del período de prueba</b> (Código de Trabajo de Costa Rica): cada casilla equivale a unos tres días. Responda tarjetas, gane <b>litros de leche</b>, consiga los <b>5 sellos</b> y llegue al <b>Comité de Continuidad</b> para ser confirmado en el puesto.</p>
+      <div class="company">
+        <b>Tipo</b><span>Cooperativa de productores, empresa mediana (240 colaboradores, 380 familias asociadas)</span>
+        <b>Sector</b><span>Agroindustrial lácteo</span>
+        <b>Actividades</b><span>Recolección de leche, laboratorio de calidad, pasteurización, quesos, yogur y natilla, distribución y asistencia técnica</span>
+        <b>Misión</b><span>Transformar la leche de nuestras familias asociadas en alimentos nutritivos, inocuos y sostenibles, generando bienestar.</span>
+        <b>Valores</b><span>Cooperación · Calidad e inocuidad · Sostenibilidad · Respeto a la diversidad · Integridad</span>
+      </div>
+      <div class="zones-legend">
+        <span class="zl"><i style="background:var(--z1)"></i>1 Inducción</span>
+        <span class="zl"><i style="background:var(--z2)"></i>2 Integración</span>
+        <span class="zl"><i style="background:var(--z3)"></i>3 Seguimiento</span>
+        <span class="zl"><i style="background:var(--z4)"></i>4 Evaluación inicial</span>
+        <span class="zl"><i style="background:var(--z5)"></i>5 Decisión de continuidad</span>
+        <span class="zl"><i style="background:var(--zd)"></i>Dilema ético y diversidad</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Jugadores</h2>
+      <p style="margin-top:0;color:var(--muted);font-size:14px">De 2 a 6 jugadores o equipos. Una persona facilitadora de Talento Humano conduce la partida en una pantalla compartida.</p>
+      <div id="plist"></div>
+      <div style="display:flex;gap:8px;margin:10px 0 16px">
+        <button class="btn-soft" id="addP" onclick="addPlayer()">＋ Agregar</button>
+        <button class="btn-soft" id="remP" onclick="removePlayer()">－ Quitar</button>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-bottom:14px"><input type="checkbox" id="useTimer" checked> Temporizador de 60 s por tarjeta</label>
+      <button class="btn" style="width:100%;font-size:17px;padding:14px" onclick="startGame()">▶ Comenzar el primer día</button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="game hidden">
+    <div>
+      <div class="boardbox"><div class="board" id="board"></div></div>
+      <div class="boardfoot">
+        <div class="turnbox">
+          <div class="die" id="die">🎲</div>
+          <div class="turninfo">
+            <div class="who" id="who"></div>
+            <div id="hint" style="color:var(--muted)"></div>
+          </div>
+          <button class="btn" id="btnRoll" onclick="onAction()">Lanzar dado</button>
+        </div>
+        <div class="clock" id="clock">⏱ 00:00 / 60:00</div>
+      </div>
+    </div>
+    <aside class="side">
+      <div id="players"></div>
+      <div>
+        <div class="fred" style="font-weight:700;margin:2px 0 6px">Bitácora de la partida</div>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </section>
+</div>
+
+<!-- MODALS -->
+<div class="ov" id="ovCard"><div class="modal">
+  <div class="mhead" id="cHead"><h3 id="cTitle"></h3><span class="pts" id="cPts"></span></div>
+  <div class="mbody">
+    <div class="timer" id="cTimer"><i id="cBar"></i></div>
+    <div id="cWho" style="font-size:13px;color:var(--muted);margin-bottom:6px"></div>
+    <p class="q" id="cQ"></p>
+    <div class="opts" id="cOpts"></div>
+    <div class="fb" id="cFb"></div>
+  </div>
+  <div class="mfoot" id="cFoot"></div>
+</div></div>
+
+<div class="ov" id="ovMsg"><div class="modal">
+  <div class="mhead" id="mHead" style="background:var(--ink)"><h3 id="mTitle"></h3></div>
+  <div class="mbody rules" id="mBody"></div>
+  <div class="mfoot" id="mFoot"></div>
+</div></div>
+
+<script>
+const CARDS = [{"id": "I-1", "z": 1, "t": "mc", "l": 1, "q": "¿Cuál es la misión de CoopeMontaña Verde?", "o": ["Ser la cooperativa más grande del país.", "Transformar la leche de las familias asociadas en alimentos nutritivos, inocuos y sostenibles, generando bienestar.", "Vender leche al menor precio posible."], "a": 1, "e": "La misión une calidad, inocuidad, sostenibilidad y bienestar para productores, colaboradores y comunidades."}, {"id": "I-2", "z": 1, "t": "mc", "l": 2, "q": "¿Cuál grupo contiene SOLO valores de CoopeMontaña Verde?", "o": ["Competencia, rapidez y ahorro.", "Cooperación, integridad y respeto a la diversidad.", "Obediencia, silencio y puntualidad."], "a": 1, "e": "Los cinco valores son: Cooperación, Calidad e inocuidad, Sostenibilidad, Respeto a la diversidad e Integridad."}, {"id": "I-3", "z": 1, "t": "mc", "l": 1, "q": "Antes de entrar a la sala de quesos usted debe:", "o": ["Solo lavarse las manos.", "Usar cofia, bata y botas, lavarse y desinfectarse las manos y pasar por el pediluvio.", "Nada, si es una visita rápida."], "a": 1, "e": "Son Buenas Prácticas de Manufactura (BPM) que protegen la inocuidad del producto."}, {"id": "I-4", "z": 1, "t": "mc", "l": 1, "q": "¿Quiénes son sus primeros puntos de contacto para dudas durante los primeros 90 días?", "o": ["Cualquier persona del pasillo.", "Su mentor(a) asignado(a) y su jefatura directa.", "Nadie: debe resolver solo para demostrar capacidad."], "a": 1, "e": "El mentor y la jefatura acompañan el período de prueba; Talento Humano atiende temas administrativos."}, {"id": "I-5", "z": 1, "t": "mc", "l": 1, "q": "La inducción que explica las tareas, equipos y procedimientos de SU puesto se llama:", "o": ["Inducción general.", "Inducción específica.", "Inducción corporativa."], "a": 1, "e": "La general presenta la organización en su conjunto; la específica, el puesto."}, {"id": "I-6", "z": 1, "t": "mc", "l": 2, "q": "Se corta la mano en la planta en su primera semana. ¿Qué es correcto?", "o": ["No está cubierto porque está en período de prueba.", "Está cubierto por la póliza de Riesgos del Trabajo desde el primer día; debe reportarlo de inmediato a la jefatura y a Salud Ocupacional.", "Debe esperar a terminar el turno para no atrasar la producción."], "a": 1, "e": "La persona en período de prueba tiene los mismos derechos, incluida la póliza de Riesgos del Trabajo."}, {"id": "I-7", "z": 1, "t": "mc", "l": 1, "q": "Según el Código de Trabajo de Costa Rica, ¿cuánto puede durar como máximo el período de prueba?", "o": ["Un mes.", "Hasta tres meses.", "Seis meses."], "a": 1, "e": "El período de prueba puede pactarse hasta por tres meses en contratos por tiempo indefinido."}, {"id": "I-8", "z": 1, "t": "mc", "l": 1, "q": "Verdadero o falso: «La inducción termina cuando se firma el contrato».", "o": ["Verdadero", "Falso"], "a": 1, "e": "Falso: la inducción es un proceso que continúa durante el período de prueba."}, {"id": "N-1", "z": 2, "t": "reto", "l": 2, "q": "RETO: en 30 segundos presente a la persona de su derecha como su nuevo compañero de planta: nombre, área imaginaria y un dato curioso.", "c": "Logrado si menciona los 3 elementos en el tiempo. El grupo vota si hay duda."}, {"id": "N-2", "z": 2, "t": "mc", "l": 2, "q": "¿Cuál de estas NO es un área de CoopeMontaña Verde?", "o": ["Laboratorio de calidad", "Planta de proceso", "Departamento de minería", "Extensión agropecuaria"], "a": 2, "e": "Las áreas son: Acopio y logística, Laboratorio de calidad, Planta de proceso, Mantenimiento, Ventas y distribución, Extensión agropecuaria, Administración y Talento Humano, Salud Ocupacional."}, {"id": "N-3", "z": 2, "t": "mc", "l": 2, "q": "RETO EN PAREJA (comente con otro jugador): ¿cuál es el orden correcto de la cadena de valor?", "o": ["Pasteurización → recolección → empaque → análisis → distribución", "Recolección en finca → recibo y análisis → pasteurización → empaque → distribución", "Distribución → empaque → recolección → análisis → pasteurización"], "a": 1, "e": "La leche se recolecta, se analiza al recibirla, se pasteuriza, se empaca y se distribuye."}, {"id": "N-4", "z": 2, "t": "mc", "l": 1, "q": "Su equipo le invita a almorzar juntos y a usted le da timidez. ¿Qué es lo más recomendable?", "o": ["Rechazar siempre.", "Aceptar al menos algunas veces para conocer al equipo.", "Pedir cambio de área."], "a": 1, "e": "La integración social facilita el aprendizaje del puesto y el sentido de pertenencia."}, {"id": "N-5", "z": 2, "t": "reto", "l": 1, "q": "MÍMICA: represente sin hablar una norma de inocuidad o seguridad. El grupo tiene 60 segundos para adivinar.", "c": "Logrado si alguien adivina. Quien adivina también puede recibir 1 litro (anótelo manualmente)."}, {"id": "N-6", "z": 2, "t": "mc", "l": 1, "q": "Un compañero habla de la «prueba de antibióticos» en la leche y usted no entiende. ¿Qué hace?", "o": ["Finge que entiende.", "Pregunta al compañero o al mentor y anota el término en su glosario.", "Lo busca después, cuando tenga tiempo libre."], "a": 1, "e": "Preguntar a tiempo es parte de una buena integración y evita errores."}, {"id": "N-7", "z": 2, "t": "mc", "l": 2, "q": "¿Qué es un plan de 30-60-90 días?", "o": ["Un calendario de vacaciones.", "Un plan con metas de aprendizaje y desempeño para cada mes del período de prueba, acordado con la jefatura.", "El horario de turnos rotativos."], "a": 1, "e": "Ordena las expectativas del período de prueba y sirve de base para el seguimiento."}, {"id": "N-8", "z": 2, "t": "reto", "l": 1, "q": "RETO DE DIVERSIDAD: comparta una costumbre, comida o tradición de su región o país que podría enriquecer al equipo.", "c": "Logrado con cualquier aporte respetuoso."}, {"id": "S-1", "z": 3, "t": "mc", "l": 2, "q": "En la reunión del día 30, su jefatura señala atrasos en los registros de temperatura. Lo más adecuado es:", "o": ["Justificarse y culpar al equipo.", "Acordar un plan de mejora con metas concretas y fecha de revisión.", "Ignorar el comentario."], "a": 1, "e": "El seguimiento sirve para corregir a tiempo con acuerdos medibles."}, {"id": "S-2", "z": 3, "t": "mc", "l": 1, "q": "¿En qué momentos mínimos conviene hacer reuniones formales de seguimiento en una prueba de 90 días?", "o": ["Solo el día 90.", "Alrededor de los días 30 y 60 y antes del día 90.", "Nunca: basta con la evaluación final."], "a": 1, "e": "Además de conversaciones informales frecuentes."}, {"id": "S-3", "z": 3, "t": "mc", "l": 2, "q": "¿Cuál NO es una característica de la retroalimentación efectiva?", "o": ["Específica", "Oportuna", "Basada en rumores", "Bidireccional"], "a": 2, "e": "La retroalimentación se basa en conductas observables, no en rumores."}, {"id": "S-4", "z": 3, "t": "mc", "l": 1, "q": "¿Dónde deben quedar registrados los acuerdos de seguimiento?", "o": ["En la memoria de la jefatura.", "En una bitácora o expediente de seguimiento firmado por ambas partes.", "En un chat informal."], "a": 1, "e": "La documentación da objetividad y respaldo a la decisión final."}, {"id": "S-5", "z": 3, "t": "mc", "l": 2, "q": "Un colaborador nuevo tiene dificultad para leer los procedimientos escritos. ¿Qué hace la jefatura?", "o": ["Lo califica bajo de inmediato.", "Ajusta el método: demostración práctica, apoyos visuales y acompañamiento del mentor.", "Le pide que estudie en su casa sin apoyo."], "a": 1, "e": "Primero se adapta la formación; luego se evalúa."}, {"id": "S-6", "z": 3, "t": "mc", "l": 1, "q": "Verdadero o falso: «El seguimiento solo sirve para detectar errores».", "o": ["Verdadero", "Falso"], "a": 1, "e": "Falso: también reconoce logros, aclara expectativas y apoya el aprendizaje."}, {"id": "S-7", "z": 3, "t": "mc", "l": 1, "q": "¿Para qué sirve una encuesta de experiencia a las personas de nuevo ingreso?", "o": ["Para sancionarlas.", "Para conocer su percepción y mejorar el programa de inducción e integración.", "No sirve para nada."], "a": 1, "e": "Permite mejorar continuamente el proceso."}, {"id": "S-8", "z": 3, "t": "mc", "l": 2, "q": "Usted es mentor y su compañero nuevo comete el mismo error tres veces. ¿Qué hace?", "o": ["Lo regaña frente al equipo.", "Explica de nuevo, verifica comprensión, lo documenta y avisa a la jefatura si persiste.", "Hace el trabajo por él."], "a": 1, "e": "El mentor apoya y deja evidencia para el seguimiento."}, {"id": "E-1", "z": 4, "t": "mc", "l": 2, "q": "¿Cuál grupo contiene criterios adecuados para evaluar el desempeño inicial de un operario de planta?", "o": ["Apariencia física, edad y religión.", "Calidad del trabajo, cumplimiento de BPM y seguridad, puntualidad y trabajo en equipo.", "Simpatía con la jefatura y redes sociales."], "a": 1, "e": "Se evalúan conductas y resultados relacionados con el puesto."}, {"id": "E-2", "z": 4, "t": "mc", "l": 2, "q": "¿Qué es el «efecto halo» al evaluar?", "o": ["Evaluar a todos con la nota máxima.", "Dejar que una sola característica influya en la calificación de todas las demás.", "Evaluar solo el último mes."], "a": 1, "e": "Es un sesgo frecuente que se evita con criterios claros y evidencias."}, {"id": "E-3", "z": 4, "t": "mc", "l": 1, "q": "¿Quiénes deberían aportar información a la evaluación inicial?", "o": ["Solo el gerente general.", "Jefatura directa, mentor(a) y la propia persona (autoevaluación), con coordinación de Talento Humano.", "Los clientes."], "a": 1, "e": "Varias fuentes dan una visión más justa."}, {"id": "E-4", "z": 4, "t": "mc", "l": 1, "q": "Para que una evaluación sea justa, los criterios deben:", "o": ["Definirse al final.", "Darse a conocer desde el inicio.", "Mantenerse en secreto."], "a": 1, "e": "La persona debe saber desde el inicio qué se espera de ella."}, {"id": "E-5", "z": 4, "t": "mc", "l": 2, "q": "Andrea obtuvo (escala 1 a 5): calidad 4, puntualidad 2, trabajo en equipo 5, BPM 4, aprendizaje 5. ¿Cuál es su promedio?", "o": ["3,5", "4,0", "4,5"], "a": 1, "e": "(4+2+5+4+5) ÷ 5 = 20 ÷ 5 = 4,0. Su punto de mejora es la puntualidad."}, {"id": "E-6", "z": 4, "t": "reto", "l": 1, "q": "AUTOEVALUACIÓN: califíquese de 1 a 5 en su participación en este juego y justifíquelo con un ejemplo concreto.", "c": "Logrado si da una calificación y un ejemplo concreto."}, {"id": "E-7", "z": 4, "t": "mc", "l": 2, "q": "Una jefatura califica más bajo a una colaboradora por su acento extranjero. ¿Es correcto?", "o": ["Sí, si el acento le molesta.", "No: es discriminación por origen, prohibida por el Código de Trabajo; solo se evalúa el desempeño.", "Sí, si los demás están de acuerdo."], "a": 1, "e": "La evaluación debe basarse en criterios objetivos del puesto."}, {"id": "E-8", "z": 4, "t": "mc", "l": 1, "q": "¿Cómo y cuándo se comunican los resultados de la evaluación inicial?", "o": ["Por correo masivo, después del día 90.", "En una entrevista privada de retroalimentación, antes de que venza el período de prueba.", "No se comunican."], "a": 1, "e": "La persona tiene derecho a conocer sus resultados a tiempo."}, {"id": "C-1", "z": 5, "t": "mc", "l": 2, "q": "Luis obtuvo promedio 4,3, cumplió su plan de 30-60-90 días y su mentor lo recomienda. ¿Qué decide el Comité?", "o": ["Confirmarlo en el puesto.", "Terminar el contrato.", "Extender la prueba otros tres meses."], "a": 0, "e": "La evidencia respalda la confirmación."}, {"id": "C-2", "z": 5, "t": "mc", "l": 3, "q": "Marta tiene promedio 2,1 e incumplimientos de inocuidad repetidos y documentados, pese a un plan de mejora. ¿Qué corresponde?", "o": ["Confirmarla para no generar conflicto.", "No continuidad, comunicada antes de cumplir los tres meses, con respeto y pagando sus derechos.", "Despedirla sin explicación el día 100."], "a": 1, "e": "La decisión debe ser oportuna, fundamentada y respetuosa."}, {"id": "C-3", "z": 5, "t": "mc", "l": 2, "q": "Si se termina el contrato durante el período de prueba, ¿qué se le paga a la persona trabajadora?", "o": ["Nada.", "Salario pendiente, aguinaldo y vacaciones proporcionales (sin preaviso ni cesantía).", "Preaviso y cesantía completos."], "a": 1, "e": "El período de prueba elimina la responsabilidad patronal, no los derechos ya generados."}, {"id": "C-4", "z": 5, "t": "mc", "l": 2, "q": "¿Puede la empresa extender el período de prueba a cuatro meses porque «aún no se decide»?", "o": ["Sí, si lo firma la persona.", "No, el máximo es de tres meses.", "Sí, en empresas medianas."], "a": 1, "e": "El plazo máximo es de tres meses."}, {"id": "C-5", "z": 5, "t": "mc", "l": 2, "q": "Nadie comunicó la decisión y la persona cumple el día 91 trabajando. ¿Qué pasa?", "o": ["Sigue en prueba indefinidamente.", "Supera el período de prueba y conserva todos los derechos de un contrato por tiempo indefinido.", "Debe volver a firmar contrato."], "a": 1, "e": "Vencido el plazo, la relación se consolida."}, {"id": "C-6", "z": 5, "t": "mc", "l": 3, "q": "Karla informa el día 70 que está embarazada. ¿Puede la empresa despedirla sin más porque está en período de prueba?", "o": ["Sí, porque está en período de prueba.", "No: está protegida también en el período de prueba; solo por falta grave y con gestión previa ante la Inspección de Trabajo del MTSS.", "Sí, si se le paga una indemnización."], "a": 1, "e": "La protección a la trabajadora embarazada o en lactancia aplica aunque esté en prueba."}, {"id": "C-7", "z": 5, "t": "mc", "l": 2, "q": "¿Cómo se comunica éticamente una decisión de no continuidad?", "o": ["Por mensaje de texto, sin explicaciones.", "En privado, con respeto, con fundamentos objetivos y documentados, y por escrito.", "Frente al equipo, para que sirva de ejemplo."], "a": 1, "e": "Se protege la dignidad de la persona."}, {"id": "C-8", "z": 5, "t": "mc", "l": 1, "q": "¿Qué documentos debe revisar el Comité de Continuidad antes de decidir?", "o": ["Solo la opinión del gerente.", "Evaluación inicial, bitácora de seguimiento, autoevaluación y criterio del mentor y la jefatura.", "Las redes sociales de la persona."], "a": 1, "e": "Una decisión justa se basa en evidencias."}, {"id": "D-1", "z": 0, "t": "mc", "l": 3, "q": "DILEMA: una jefatura propone no confirmar a un colaborador de 52 años porque «no se va a adaptar a la tecnología», aunque su desempeño es bueno. ¿Qué hace usted?", "o": ["Apoyar la propuesta.", "Oponerse: es discriminación por edad; la decisión se basa en el desempeño demostrado.", "No opinar."], "a": 1, "e": "El Código de Trabajo prohíbe la discriminación por edad."}, {"id": "D-2", "z": 0, "t": "mc", "l": 3, "q": "DILEMA: un colaborador nuevo pide no trabajar los sábados por motivos religiosos. ¿Qué es lo adecuado?", "o": ["Negarlo y anotarlo en su evaluación.", "Analizar un ajuste razonable de turnos si la operación lo permite, sin perjudicarlo en la evaluación.", "Despedirlo en el período de prueba."], "a": 1, "e": "Se respeta la libertad religiosa y se buscan soluciones viables."}, {"id": "D-3", "z": 0, "t": "mc", "l": 3, "q": "DILEMA: varios compañeros hacen bromas sobre el acento de una colaboradora nicaragüense recién contratada. ¿Qué hace usted?", "o": ["Reírse para integrarse.", "Intervenir con respeto, reportarlo a la jefatura o a Talento Humano y recordar la política de respeto a la diversidad.", "Ignorarlo: son solo bromas."], "a": 1, "e": "El respeto a la diversidad es un valor de la cooperativa."}, {"id": "D-4", "z": 0, "t": "mc", "l": 3, "q": "DILEMA: ingresa una persona con discapacidad auditiva. ¿Cómo se adapta la inducción?", "o": ["Se le da la misma charla oral y se espera que entienda.", "Material escrito y visual, videos con subtítulos, intérprete de LESCO si es posible y un mentor de apoyo.", "Se omite su inducción."], "a": 1, "e": "La Ley 7600 promueve la igualdad de oportunidades para personas con discapacidad."}, {"id": "D-5", "z": 0, "t": "mc", "l": 3, "q": "DILEMA: usted es mentor y amigo personal de la persona evaluada; le pide «subirle» las notas. ¿Qué hace?", "o": ["Subirle las notas: es su amigo.", "Declarar el conflicto de interés y evaluar con objetividad o pedir que otra persona participe.", "Bajarle las notas para que no parezca favoritismo."], "a": 1, "e": "La integridad exige evaluar con objetividad."}];
+const ZN = {0:"Dilema ético y diversidad",1:"Inducción",2:"Integración al puesto",3:"Seguimiento",4:"Evaluación del desempeño inicial",5:"Decisión de continuidad"};
+const ZS = {1:"I",2:"N",3:"S",4:"E",5:"C"};
+const ZC = {0:"var(--zd)",1:"var(--z1)",2:"var(--z2)",3:"var(--z3)",4:"var(--z4)",5:"var(--z5)"};
+const DILEMA=[3,9,15,21,27], MENTOR=[8,14], GATES=[6,12,18,24,30];
+const COLORS=["#E63946","#1D3557","#F4A261","#2A9D8F","#9B5DE5","#FFFFFF"];
+const zoneOf = s => Math.ceil(s/6);
+let players=[], turn=0, decks={}, started=0, clockInt=null, lastMentor=null, finishers=0, busy=false, useTimer=true, ended=false;
+
+// ---------- setup ----------
+let setupNames=["Jugador 1","Jugador 2","Jugador 3"];
+function renderSetup(){
+  const el=document.getElementById("plist"); el.innerHTML="";
+  setupNames.forEach((n,i)=>{
+    const r=document.createElement("div"); r.className="prow";
+    r.innerHTML=`<span class="chip" style="background:${COLORS[i]}"></span><input maxlength="20" value="${n}" oninput="setupNames[${i}]=this.value">`;
+    el.appendChild(r);
+  });
+  document.getElementById("addP").disabled=setupNames.length>=6;
+  document.getElementById("remP").disabled=setupNames.length<=2;
+}
+function addPlayer(){ if(setupNames.length<6){setupNames.push("Jugador "+(setupNames.length+1));renderSetup();} }
+function removePlayer(){ if(setupNames.length>2){setupNames.pop();renderSetup();} }
+renderSetup();
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function draw(z){ if(!decks[z]||!decks[z].length) decks[z]=shuffle(CARDS.filter(c=>c.z===z)); return decks[z].shift(); }
+
+function startGame(){
+  useTimer=document.getElementById("useTimer").checked;
+  players=setupNames.map((n,i)=>({name:(n||"Jugador "+(i+1)).trim(),color:COLORS[i],pos:0,litros:3,ac:[0,0,0,0,0,0],seal:[false,false,false,false,false,false],dil:0,plan:null,done:false,order:null}));
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+  document.getElementById("btnEnd").classList.remove("hidden");
+  buildBoard(); started=Date.now(); clockInt=setInterval(tick,1000); tick();
+  log("Comienza el día 1. Cada jugador recibe <b>3 litros</b> de bienvenida.");
+  renderAll();
+}
+function tick(){
+  const s=Math.floor((Date.now()-started)/1000), m=Math.floor(s/60);
+  const c=document.getElementById("clock");
+  c.textContent=`⏱ ${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")} / 60:00`;
+  if(m>=60 && !ended){ c.style.background="#FBE3E2"; }
+}
+
+// ---------- board ----------
+function cellPos(k){ // returns [row,col] 1-based for square k (0=start,31=meta)
+  if(k===0) return [1,1];
+  if(k===31) return [4,3];
+  if(k<=8) return [1,k+1];
+  if(k<=16) return [2,9-(k-9)];
+  if(k<=24) return [3,(k-17)+2];
+  return [4,9-(k-25)];
+}
+function buildBoard(){
+  const b=document.getElementById("board"); b.innerHTML="";
+  for(let k=0;k<=31;k++){
+    const d=document.createElement("div"); d.className="sq"; d.id="sq"+k;
+    const [r,c]=cellPos(k); d.style.gridRow=r; d.style.gridColumn=c;
+    if(k===0){d.classList.add("start");d.innerHTML=`<span class="n" style="font-size:clamp(11px,1.2vw,16px)">SALIDA</span><span class="lab">Día 1</span>`;}
+    else if(k===31){d.classList.add("meta");d.innerHTML=`<span class="n" style="font-size:clamp(10px,1.1vw,15px)">META</span><span class="lab">Comité de Continuidad · Día 90</span>`;}
+    else{
+      const z=zoneOf(k); let bg=ZC[z], lab="";
+      if(DILEMA.includes(k)){bg=ZC[0];lab="Dilema ético";}
+      if(MENTOR.includes(k)) lab="Mentor";
+      if(GATES.includes(k)){d.classList.add("gate");lab="Puerta · sello "+ZS[z];}
+      d.style.background=bg; d.innerHTML=`<span class="n">${k}</span><span class="lab">${lab}</span>`;
+    }
+    const t=document.createElement("div"); t.className="tokens"; d.appendChild(t);
+    b.appendChild(d);
+  }
+}
+
+// ---------- render ----------
+function cur(){return players[turn];}
+function renderAll(){
+  document.querySelectorAll(".tokens").forEach(t=>t.innerHTML="");
+  document.querySelectorAll(".sq.here").forEach(t=>t.classList.remove("here"));
+  players.forEach((p,i)=>{
+    const t=document.createElement("div"); t.className="tok"+(i===turn&&!ended?" active":""); t.style.background=p.color; t.title=p.name;
+    if(p.color==="#FFFFFF") t.style.borderColor="#2E2618";
+    document.querySelector(`#sq${p.pos} .tokens`).appendChild(t);
+  });
+  if(!ended) document.getElementById("sq"+cur().pos).classList.add("here");
+  const pl=document.getElementById("players"); pl.innerHTML="";
+  players.forEach((p,i)=>{
+    const d=document.createElement("div"); d.className="pcard"+(i===turn&&!ended?" current":"");
+    const seals=[1,2,3,4,5].map(z=>`<div class="seal ${p.seal[z]?"on":""}" style="${p.seal[z]?"background:"+ZC[z]:""}" title="${ZN[z]}">${ZS[z]}</div>`).join("");
+    const st=p.done?'<span class="tag" style="background:var(--gold)">En el Comité</span>':(p.plan?`<span class="tag">Plan de mejora ${ZS[p.plan]}</span>`:"");
+    d.innerHTML=`<div class="h"><span class="chip" style="background:${p.color};width:18px;height:18px"></span>${esc(p.name)}${st}<span class="lit">🥛 ${p.litros} L</span></div>
+      <div class="seals">${seals}</div>
+      <div class="ac">Aciertos: I ${p.ac[1]} · N ${p.ac[2]} · S ${p.ac[3]} · E ${p.ac[4]} · C ${p.ac[5]} · Dilemas ${p.dil} · Casilla ${p.pos===31?"Meta":p.pos}</div>`;
+    pl.appendChild(d);
+  });
+  if(ended) return;
+  const p=cur();
+  document.getElementById("who").innerHTML=`<span class="chip" style="background:${p.color};width:18px;height:18px"></span>Turno de ${esc(p.name)}`;
+  const btn=document.getElementById("btnRoll");
+  if(p.plan){btn.textContent="Responder plan de mejora";document.getElementById("hint").textContent=`Está en la Puerta de ${ZN[p.plan]} sin sello: responda una tarjeta de esa zona (necesita 2 aciertos).`;}
+  else{btn.textContent="Lanzar dado";document.getElementById("hint").textContent=`Casilla ${p.pos===0?"Salida":p.pos} · día ${Math.max(1,p.pos*3)} del período de prueba.`;}
+  btn.disabled=busy;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function log(h){const l=document.getElementById("log");const d=document.createElement("div");d.innerHTML=h;l.prepend(d);}
+
+// ---------- turn flow ----------
+function onAction(){
+  if(busy||ended) return;
+  const p=cur();
+  if(p.plan){ busy=true; renderAll(); const z=p.plan; askCard(draw(z),p,null,z,()=>afterGate(p,p.pos)); return; }
+  busy=true; renderAll();
+  const die=document.getElementById("die"); die.classList.remove("roll"); void die.offsetWidth; die.classList.add("roll");
+  let n=0; const spin=setInterval(()=>{die.textContent=1+Math.floor(Math.random()*3); if(++n>7){clearInterval(spin); const v=1+Math.floor(Math.random()*3); die.textContent=v; move(p,v);}},60);
+}
+function move(p,v){
+  const gate=GATES.find(g=>g>p.pos);
+  let target=Math.min(p.pos+v,gate);
+  const stepTo=()=>{
+    if(p.pos<target){p.pos++;renderAll();setTimeout(stepTo,260);}
+    else land(p,v,target===gate&&p.pos+0<p.pos+v&&target<p.pos+v);
+  };
+  log(`${esc(p.name)} lanza un <b>${v}</b>.`);
+  setTimeout(stepTo,200);
+}
+function land(p){
+  const k=p.pos, z=zoneOf(k);
+  if(GATES.includes(k)) log(`${esc(p.name)} se detiene en la <b>Puerta de ${ZN[z]}</b>.`);
+  const after=()=> GATES.includes(k)?afterGate(p,k):endTurn();
+  if(DILEMA.includes(k)){ askCard(draw(0),p,null,z,after,true); }
+  else if(MENTOR.includes(k)){ pickMentor(p,m=>askCard(draw(z),p,m,z,after)); }
+  else askCard(draw(z),p,null,z,after);
+}
+function afterGate(p,k){
+  const z=zoneOf(k);
+  if(p.ac[z]>=2){
+    p.seal[z]=true; p.plan=null;
+    log(`✅ ${esc(p.name)} obtiene el <b>sello ${ZS[z]}</b> (${ZN[z]}).`);
+    if(k===30){
+      p.done=true; p.pos=31; finishers++; p.order=finishers;
+      if(finishers===1){p.litros+=2; log(`🏁 ${esc(p.name)} llega primero al Comité: <b>+2 litros de puntualidad</b>.`);} else log(`🏁 ${esc(p.name)} llega al Comité de Continuidad.`);
+      renderAll();
+      if(players.every(x=>x.done)) return setTimeout(finishGame,500);
+      return showMsg("¡Día 90!",`<p><b>${esc(p.name)}</b> completó los cinco sellos y llega al <b>Comité de Continuidad</b>. Su dictamen se conocerá cuando termine la partida.</p>`,[["Continuar","btn",()=>{closeMsg();endTurn();}]]);
+    }
+    showMsg("Sello obtenido",`<p><b>${esc(p.name)}</b> tiene ${p.ac[z]} aciertos en <b>${ZN[z]}</b> y recibe el sello <b>${ZS[z]}</b>. En su próximo turno cruza la Puerta.</p>`,[["Continuar","btn",()=>{closeMsg();endTurn();}]]);
+  } else {
+    p.plan=z;
+    log(`⚠️ ${esc(p.name)} queda en <b>plan de mejora</b> de ${ZN[z]} (${p.ac[z]}/2 aciertos).`);
+    showMsg("Plan de mejora",`<p><b>${esc(p.name)}</b> llegó a la Puerta de <b>${ZN[z]}</b> con ${p.ac[z]} de 2 aciertos.</p><p>En sus próximos turnos, en lugar de lanzar el dado, responderá tarjetas de esta zona hasta completar 2 aciertos. Así funciona el seguimiento: corregir a tiempo, no castigar.</p>`,[["Entendido","btn",()=>{closeMsg();endTurn();}]]);
+  }
+}
+function endTurn(){
+  busy=false;
+  if(players.every(x=>x.done)) return finishGame();
+  do{turn=(turn+1)%players.length;}while(players[turn].done);
+  renderAll();
+}
+
+// ---------- mentor ----------
+function pickMentor(p,cb){
+  const others=players.filter(x=>x!==p && x!==lastMentor);
+  const pool=others.length?others:players.filter(x=>x!==p);
+  const html=`<p>¡Casilla <b>Mentor</b>! Elija a otro participante como mentor(a). Resolverán juntos la tarjeta y, si aciertan, <b>ambos</b> ganan los litros y el acierto.</p>
+  <div class="mentorpick">${pool.map((x,i)=>`<button class="btn-soft" data-i="${players.indexOf(x)}"><span class="chip" style="display:inline-block;vertical-align:middle;width:14px;height:14px;background:${x.color}"></span> ${esc(x.name)}</button>`).join("")}</div>
+  ${players.length>2?'<p style="font-size:13px;color:var(--muted)">Una misma persona no puede ser mentora dos veces seguidas.</p>':""}`;
+  showMsg("Mentor",html,[]);
+  document.querySelectorAll(".mentorpick button").forEach(b=>b.onclick=()=>{const m=players[+b.dataset.i]; lastMentor=m; closeMsg(); log(`🤝 ${esc(p.name)} elige a ${esc(m.name)} como mentor(a).`); cb(m);});
+}
+
+// ---------- card ----------
+let tInt=null;
+function askCard(card,p,mentor,zone,after,isDilema){
+  const color=ZC[card.z];
+  document.getElementById("cHead").style.background=color;
+  document.getElementById("cHead").style.color=card.z===3?"#2E2618":"#fff";
+  document.getElementById("cTitle").textContent=`${card.id} · ${ZN[card.z]}`;
+  document.getElementById("cPts").textContent=`🥛 ${card.l} ${card.l===1?"litro":"litros"}`;
+  document.getElementById("cWho").innerHTML=`Responde: <b>${esc(p.name)}</b>${mentor?` con su mentor(a) <b>${esc(mentor.name)}</b>`:""}${p.plan?" · plan de mejora":""}`;
+  document.getElementById("cQ").textContent=card.q;
+  const opts=document.getElementById("cOpts"), fb=document.getElementById("cFb"), foot=document.getElementById("cFoot");
+  opts.innerHTML=""; fb.className="fb"; fb.innerHTML=""; foot.innerHTML="";
+  let answered=false;
+  const finish=(result)=>{ // result: 'ok' | 'part' | 'no'
+    if(answered) return; answered=true; clearInterval(tInt);
+    const who=[p].concat(mentor?[mentor]:[]);
+    if(result==='ok'){ who.forEach(x=>{x.litros+=card.l; x.ac[zone]++; if(isDilema) x.dil++;}); }
+    if(result==='part'){ p.litros+=1; }
+    const names=who.map(x=>esc(x.name)).join(" y ");
+    log(result==='ok'?`✔️ ${names}: acierto en ${card.id} (+${card.l} L).`:result==='part'?`➗ ${esc(p.name)}: logro parcial en ${card.id} (+1 L).`:`✖️ ${esc(p.name)}: no acierta ${card.id}.`);
+    renderAll();
+    const go=document.createElement("button"); go.className="btn"; go.textContent="Continuar";
+    go.onclick=()=>{document.getElementById("ovCard").classList.remove("show"); after();};
+    foot.innerHTML=""; foot.appendChild(go);
+  };
+  if(card.t==="mc"){
+    card.o.forEach((o,i)=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=String.fromCharCode(97+i)+") "+o;
+      b.onclick=()=>{
+        if(answered) return;
+        [...opts.children].forEach((x,j)=>{x.disabled=true; if(j===card.a) x.classList.add("good");});
+        const ok=i===card.a; if(!ok) b.classList.add("bad");
+        fb.className="fb show "+(ok?"ok":"no");
+        fb.innerHTML=(ok?`<b>¡Correcto! +${card.l} ${card.l===1?"litro":"litros"}.</b> `:`<b>No es correcto.</b> La respuesta es la <b>${String.fromCharCode(97+card.a)}</b>. `)+esc(card.e);
+        finish(ok?'ok':'no');
+      };
+      opts.appendChild(b);
+    });
+  } else {
+    fb.className="fb show info"; fb.innerHTML=`<b>Criterio:</b> ${esc(card.c)}<br><span style="font-size:13px">La persona facilitadora (o el grupo por votación) decide el resultado.</span>`;
+    [["Logrado (+"+card.l+")","btn-ok",'ok'],["Parcial (+1, no cuenta acierto)","btn-mid",'part'],["No logrado","btn-no",'no']].forEach(([t,c,r])=>{
+      const b=document.createElement("button"); b.className=c; b.textContent=t;
+      b.onclick=()=>{fb.innerHTML=`<b>Resultado:</b> ${t}.`; finish(r);}; foot.appendChild(b);
+    });
+  }
+  // timer
+  const tm=document.getElementById("cTimer"), bar=document.getElementById("cBar");
+  clearInterval(tInt);
+  if(useTimer){
+    tm.classList.remove("hidden"); let left=60; bar.style.transition="none"; bar.style.width="100%"; void bar.offsetWidth; bar.style.transition="width 1s linear";
+    tInt=setInterval(()=>{left--; bar.style.width=(left/60*100)+"%"; if(left<=0){clearInterval(tInt);
+      if(card.t==="mc"&&!answered){[...opts.children].forEach((x,j)=>{x.disabled=true;if(j===card.a)x.classList.add("good");});fb.className="fb show no";fb.innerHTML=`<b>Tiempo agotado.</b> La respuesta era la <b>${String.fromCharCode(97+card.a)}</b>. `+esc(card.e);finish('no');}
+      else if(!answered){bar.style.background="var(--z5)";}
+    }},1000);
+    bar.style.background="var(--ink)";
+  } else tm.classList.add("hidden");
+  document.getElementById("ovCard").classList.add("show");
+}
+
+// ---------- messages ----------
+function showMsg(title,html,buttons,headColor){
+  document.getElementById("mTitle").textContent=title;
+  document.getElementById("mHead").style.background=headColor||"var(--ink)";
+  document.getElementById("mHead").style.color="#fff";
+  document.getElementById("mBody").innerHTML=html;
+  const f=document.getElementById("mFoot"); f.innerHTML="";
+  buttons.forEach(([t,c,fn])=>{const b=document.createElement("button");b.className=c;b.textContent=t;b.onclick=fn;f.appendChild(b);});
+  document.getElementById("ovMsg").classList.add("show");
+}
+function closeMsg(){document.getElementById("ovMsg").classList.remove("show");}
+function openRules(){
+  showMsg("Reglas de Ruta Láctea 90",`
+  <h4>Objetivo</h4><p>Recorrer los 90 días del período de prueba en CoopeMontaña Verde, conseguir los 5 sellos y llegar al Comité de Continuidad con la mayor cantidad de <b>litros de leche</b> (puntos).</p>
+  <h4>Turno</h4><ul><li>Lance el dado (valores de 1 a 3) y avance.</li><li>Responda la tarjeta del color de la casilla en 60 segundos. Si acierta, gana los litros indicados y suma un acierto en esa zona.</li><li>Si falla, no gana litros y se muestra la respuesta correcta.</li></ul>
+  <h4>Casillas especiales</h4><ul><li><b>Dilema ético (morada: 3, 9, 15, 21, 27):</b> vale 3 litros y el acierto cuenta para la zona.</li><li><b>Mentor (8 y 14):</b> elija a otro jugador; si aciertan, ambos ganan litros y acierto. Nadie es mentor dos veces seguidas.</li><li><b>Puerta (borde grueso: 6, 12, 18, 24, 30):</b> la ficha siempre se detiene. Tras responder su tarjeta, si tiene <b>2 aciertos</b> en la zona recibe el <b>sello</b>; si no, queda en <b>plan de mejora</b> y en cada turno responde tarjetas de esa zona hasta lograrlo.</li></ul>
+  <h4>Retos de acción</h4><p>Presentaciones, mímicas y autoevaluaciones se califican como Logrado, Parcial (+1 litro, sin acierto) o No logrado; decide la persona facilitadora o el grupo por votación.</p>
+  <h4>Comité de Continuidad y fin</h4><ul><li>El primero en llegar gana <b>+2 litros de puntualidad</b>.</li><li>La partida termina cuando todos llegan o al cumplirse <b>60 minutos</b> (botón «Terminar partida»).</li><li>Dictamen: <b>Confirmado destacado</b> (5 sellos y 30 litros o más), <b>Confirmado</b> (5 sellos y 20 a 29 litros), <b>No supera el período de prueba</b> (menos de 5 sellos o menos de 20 litros).</li><li>Gana el jugador confirmado con más litros; desempata quien tenga más dilemas acertados y luego quien llegó primero.</li></ul>
+  <h4>Convivencia</h4><p>Respeto a cada persona, cultura y creencia. La clave de respuestas es la decisión final.</p>`,[["Cerrar","btn",closeMsg]]);
+}
+function confirmEnd(){
+  if(ended) return;
+  showMsg("¿Terminar la partida?","<p>Se cumplió el tiempo o el grupo decide cerrar. El Comité evaluará a cada jugador con el expediente que tenga en este momento (el período de prueba no se prorroga).</p>",[["Cancelar","btn-soft",closeMsg],["Sí, convocar al Comité","btn",()=>{closeMsg();finishGame();}]]);
+}
+function finishGame(){
+  if(ended) return; ended=true; clearInterval(clockInt); clearInterval(tInt);
+  document.getElementById("ovCard").classList.remove("show");
+  document.getElementById("btnEnd").classList.add("hidden");
+  document.getElementById("btnRestart").classList.remove("hidden");
+  document.getElementById("btnRoll").disabled=true;
+  document.getElementById("hint").textContent="Partida terminada.";
+  const res=players.map(p=>{
+    const s=[1,2,3,4,5].filter(z=>p.seal[z]).length;
+    let v,c; if(s===5&&p.litros>=30){v="Confirmado destacado";c="v1";} else if(s===5&&p.litros>=20){v="Confirmado";c="v2";} else {v="No supera el período de prueba";c="v3";}
+    return {p,s,v,c,conf:c!=="v3"};
+  });
+  const ranked=res.slice().sort((a,b)=> (b.conf-a.conf)||(b.p.litros-a.p.litros)||(b.p.dil-a.p.dil)||((a.p.order||99)-(b.p.order||99)));
+  const win=ranked.find(r=>r.conf);
+  renderAll();
+  showMsg("Dictamen del Comité de Continuidad",`
+    ${win?`<p style="font-size:18px">🏆 Gana <b>${esc(win.p.name)}</b> con ${win.p.litros} litros.</p>`:`<p style="font-size:18px">Ningún jugador cumplió los requisitos de confirmación.</p>`}
+    <table class="res"><tr><th>Jugador</th><th>Sellos</th><th>Litros</th><th>Dilemas</th><th>Dictamen</th></tr>
+    ${ranked.map(r=>`<tr><td><span class="chip" style="display:inline-block;vertical-align:middle;width:14px;height:14px;background:${r.p.color}"></span> ${esc(r.p.name)}</td><td>${r.s}/5</td><td>${r.p.litros}</td><td>${r.p.dil}</td><td><span class="verdict ${r.c}">${r.v}</span></td></tr>`).join("")}
+    </table>
+    <h4>Cierre reflexivo (5 minutos)</h4><ul><li>¿Qué tarjeta les costó más y por qué?</li><li>¿Qué aprendieron sobre los derechos y deberes en el período de prueba?</li><li>¿Qué harían distinto como mentores o jefaturas?</li></ul>`,[["Ver tablero","btn-soft",closeMsg],["Nueva partida","btn",()=>location.reload()]],"var(--gold)");
+  document.getElementById("mHead").style.color="var(--ink)";
+}
+</script>
+</body>
+</html>
