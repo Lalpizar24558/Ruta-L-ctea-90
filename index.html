@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruta Láctea 90 – Juego de inducción y período de prueba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="26" height="30" viewBox="0 0 26 30"><path d="M8 1h10v5l4 6v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V12l4-6z" fill="#fff" stroke="#2E2618" stroke-width="2.2" stroke-linejoin="round"/><path d="M4 17h18v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="#3F86D6"/></svg>
+      </div>
+      <div>
+        <h1>RUTA LÁCTEA 90</h1>
+        <p>Del primer día a la confirmación · CoopeMontaña Verde R.L.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn-soft" onclick="openRules()">📖 Reglas</button>
+      <button class="btn-soft hidden" id="btnEnd" onclick="confirmEnd()">🏁 Terminar partida</button>
+      <button class="btn-soft hidden" id="btnRestart" onclick="location.reload()">↺ Nueva partida</button>
+    </div>
+  </header>
+
+  <!-- SETUP -->
+  <section id="setup" class="setup">
+    <div class="panel">
+      <h2>Bienvenida a CoopeMontaña Verde R.L.</h2>
+      <p style="margin-top:0">Cada jugador es una persona recién contratada en una cooperativa lechera mediana de Zarcero, Alajuela. El tablero recorre los <b>90 días del período de prueba</b> (Código de Trabajo de Costa Rica): cada casilla equivale a unos tres días. Responda tarjetas, gane <b>litros de leche</b>, consiga los <b>5 sellos</b> y llegue al <b>Comité de Continuidad</b> para ser confirmado en el puesto.</p>
+      <div class="company">
+        <b>Tipo</b><span>Cooperativa de productores, empresa mediana (240 colaboradores, 380 familias asociadas)</span>
+        <b>Sector</b><span>Agroindustrial lácteo</span>
+        <b>Actividades</b><span>Recolección de leche, laboratorio de calidad, pasteurización, quesos, yogur y natilla, distribución y asistencia técnica</span>
+        <b>Misión</b><span>Transformar la leche de nuestras familias asociadas en alimentos nutritivos, inocuos y sostenibles, generando bienestar.</span>
+        <b>Valores</b><span>Cooperación · Calidad e inocuidad · Sostenibilidad · Respeto a la diversidad · Integridad</span>
+      </div>
+      <div class="zones-legend">
+        <span class="zl"><i style="background:var(--z1)"></i>1 Inducción</span>
+        <span class="zl"><i style="background:var(--z2)"></i>2 Integración</span>
+        <span class="zl"><i style="background:var(--z3)"></i>3 Seguimiento</span>
+        <span class="zl"><i style="background:var(--z4)"></i>4 Evaluación inicial</span>
+        <span class="zl"><i style="background:var(--z5)"></i>5 Decisión de continuidad</span>
+        <span class="zl"><i style="background:var(--zd)"></i>Dilema ético y diversidad</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Jugadores</h2>
+      <p style="margin-top:0;color:var(--muted);font-size:14px">De 2 a 6 jugadores o equipos. Una persona facilitadora de Talento Humano conduce la partida en una pantalla compartida.</p>
+      <div id="plist"></div>
+      <div style="display:flex;gap:8px;margin:10px 0 16px">
+        <button class="btn-soft" id="addP" onclick="addPlayer()">＋ Agregar</button>
+        <button class="btn-soft" id="remP" onclick="removePlayer()">－ Quitar</button>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-bottom:14px"><input type="checkbox" id="useTimer" checked> Temporizador de 60 s por tarjeta</label>
+      <button class="btn" style="width:100%;font-size:17px;padding:14px" onclick="startGame()">▶ Comenzar el primer día</button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="game hidden">
+    <div>
+      <div class="boardbox"><div class="board" id="board"></div></div>
+      <div class="boardfoot">
+        <div class="turnbox">
+          <div class="die" id="die">🎲</div>
+          <div class="turninfo">
+            <div class="who" id="who"></div>
+            <div id="hint" style="color:var(--muted)"></div>
+          </div>
+          <button class="btn" id="btnRoll" onclick="onAction()">Lanzar dado</button>
+        </div>
+        <div class="clock" id="clock">⏱ 00:00 / 60:00</div>
+      </div>
+    </div>
+    <aside class="side">
+      <div id="players"></div>
+      <div>
+        <div class="fred" style="font-weight:700;margin:2px 0 6px">Bitácora de la partida</div>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </section>
+</div>
+
+<!-- MODALS -->
+<div class="ov" id="ovCard"><div class="modal">
+  <div class="mhead" id="cHead"><h3 id="cTitle"></h3><span class="pts" id="cPts"></span></div>
+  <div class="mbody">
+    <div class="timer" id="cTimer"><i id="cBar"></i></div>
+    <div id="cWho" style="font-size:13px;color:var(--muted);margin-bottom:6px"></div>
+    <p class="q" id="cQ"></p>
+    <div class="opts" id="cOpts"></div>
+    <div class="fb" id="cFb"></div>
+  </div>
+  <div class="mfoot" id="cFoot"></div>
+</div></div>
+
+<div class="ov" id="ovMsg"><div class="modal">
+  <div class="mhead" id="mHead" style="background:var(--ink)"><h3 id="mTitle"></h3></div>
+  <div class="mbody rules" id="mBody"></div>
+  <div class="mfoot" id="mFoot"></div>
+</div></div>
+
+<script src="js/cards.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
